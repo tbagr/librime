@@ -1,0 +1,20 @@
+PATH=C:\Program Files\Microsoft Visual Studio\Community\VC\Tools\MSVC\14.51.36231\bin\HostX64\x64;C:\Program Files\Microsoft Visual Studio\Community\Common7\IDE\VC\VCPackages;C:\Program Files\Microsoft Visual Studio\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow;C:\Program Files\Microsoft Visual Studio\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer;C:\Program Files\Microsoft Visual Studio\Community\MSBuild\Current\bin\Roslyn;C:\Program Files (x86)\HTML Help Workshop;C:\Program Files\Microsoft Visual Studio\Community\Team Tools\DiagnosticsHub\Collector;C:\Program Files\Microsoft Visual Studio\Community\Common7\IDE\Extensions\Microsoft\CodeCoverage.Console;C:\Program Files (x86)\Windows Kits\10\bin\10.0.28000.0\\x64;C:\Program Files (x86)\Windows Kits\10\bin\\x64;C:\Program Files\Microsoft Visual Studio\Community\\MSBuild\Current\Bin\amd64;C:\Windows\Microsoft.NET\Framework64\v4.0.30319;C:\Program Files\Microsoft Visual Studio\Community\Common7\IDE\;C:\Program Files\Microsoft Visual Studio\Community\Common7\Tools\;C:\msys64\ucrt64\bin;C:\Program Files\dotnet\;C:\Program Files\FireDaemon OpenSSL 3\bin\;C:\Program Files\Git\cmd;C:\Program Files\PuTTY\;C:\Program Files (x86)\WinSCP\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Windows;C:\Windows\system32;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\dev\android\Sdk\platform-tools;C:\dev\android\Avd;C:\dev\android\Gradle;C:\dev\java\jdk-21.0.9\bin;C:\dev\java\apache-maven-3.6.3\bin;C:\dev\MySQL\MySQL Server 8.0\bin;C:\dev\dev-tools\nvm;C:\dev\dev-tools\nodejs;C:\dev\dev-tools\npm;C:\Program Files\FireDaemon OpenSSL 3\bin;C:\Program Files\JetBrains\PyCharm 2025.3.1\bin;C:\dev\python\Python314\;C:\dev\python\Python314\Scripts\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\msys64\ucrt64\bin;C:\Program Files\dotnet\;C:\Program Files\FireDaemon OpenSSL 3\bin\;C:\Program Files\Git\cmd;C:\Program Files\PuTTY\;C:\Program Files (x86)\WinSCP\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Windows;C:\Windows\system32;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\dev\android\Avd;C:\dev\android\Gradle;C:\dev\java\jdk-17.0.16\bin;C:\dev\java\apache-maven-3.6.3\bin;C:\dev\MySQL\MySQL Server 8.0\bin;C:\dev\dev-tools\nvm;C:\dev\dev-tools\nodejs;C:\dev\dev-tools\npm;C:\Program Files\FireDaemon OpenSSL 3\bin;C:\Program Files\JetBrains\PyCharm 2025.3.1\bin;C:\dev\python\Python314\;C:\dev\python\Python314\Scripts\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\dev\MySQL\MySQL Shell 8.0\bin\;C:\Users\Administrator\AppData\Local\Programs\Python\Launcher\;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Users\Administrator\.dotnet\tools;C:\Users\Administrator\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2025.3.1\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.3\bin;C:\Program Files\Microsoft Visual Studio\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExe
+
+RIME_ROOT=C:\dev\workspace\android\ime\weasel\librime
+
+BOOST_ROOT=C:\dev\boost\boost_1_91_0
+
+building glog.
+CMake Error at CMakeLists.txt:2 (project):
+  Generator
+
+    Visual Studio 17 2022
+
+  could not find any instance of Visual Studio.
+
+
+
+-- Configuring incomplete, errors occurred!
+
+error building la rime.
+

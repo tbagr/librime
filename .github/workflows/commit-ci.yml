@@ -3,9 +3,9 @@ name: Commit CI
 on:
   push:
     branches:
-      - '!master'
+      - "!master"
     tags:
-      - '![0-9]+.*'
+      - "![0-9]+.*"
   pull_request:
 
 jobs:

@@ -29,8 +29,8 @@ columns:
   - stem
 encoder:
   exclude_patterns:
-    - '^x.*$'
-    - '^z.*$'
+    - "^x.*$"
+    - "^z.*$"
   rules:
     - length_equal: 2
       formula: "AaAzBaBbBz"
@@ -40,7 +40,6 @@ encoder:
       formula: "AaBzCaYzZz"
   tail_anchor: "'"
 ...
-
 日	a
 曰	a
 昌	aa
@@ -23834,7 +23833,7 @@ encoder:
 э	zg
 ю	zg
 я	zg
-　	zxaa
+zxaa
 ，	zxab
 、	zxac
 。	zxad

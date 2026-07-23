@@ -1,0 +1,5 @@
+RIME_PLUGINS=hchunhui/librime-lua 
+librime 
+1.13.1
+hchunhui/librime-lua 
+ec52e48

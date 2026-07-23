@@ -206,6 +206,17 @@ bool LazyTableTranslation::FetchMoreTableEntries() {
 
 // TableTranslator
 
+static inline bool is_tiger_schema(Engine* engine) {
+  if (!engine || !engine->schema())
+    return false;
+  const string& schema_id = engine->schema()->schema_id();
+  return schema_id == "tiger" || schema_id == "tigress";
+}
+
+static inline bool has_ascii_digit(const string& input) {
+  return input.find_first_of("0123456789") != string::npos;
+}
+
 TableTranslator::TableTranslator(const Ticket& ticket)
     : Translator(ticket), Memory(ticket), TranslatorOptions(ticket) {
   if (!engine_)
@@ -225,6 +236,10 @@ TableTranslator::TableTranslator(const Ticket& ticket)
         contextual_suggestions_) {
       poet_.reset(new Poet(language(), config, Poet::LeftAssociateCompare));
     }
+  }
+  if (is_tiger_schema(engine_)) {
+    enable_encoder_ = false;
+    encode_commit_history_ = false;
   }
   if (enable_encoder_ && user_dict_) {
     encoder_.reset(new UnityTableEncoder(user_dict_.get()));
@@ -246,10 +261,19 @@ an<Translation> TableTranslator::Query(const string& input,
   DLOG(INFO) << "input = '" << input << "', [" << segment.start << ", "
              << segment.end << ")";
 
+  if (is_tiger_schema(engine_) && has_ascii_digit(input)) {
+    auto candidate =
+        New<SimpleCandidate>("raw", segment.start, segment.end, input, "", input);
+    if (candidate) {
+      candidate->set_quality(1e6);
+    }
+    return New<UniqueTranslation>(candidate);
+  }
+
   FinishSession();
 
-  bool enable_user_dict =
-      user_dict_ && user_dict_->loaded() && !IsUserDictDisabledFor(input);
+  bool enable_user_dict = !is_tiger_schema(engine_) && user_dict_ &&
+                          user_dict_->loaded() && !IsUserDictDisabledFor(input);
 
   const string& preedit(input);
   string code = input;
@@ -307,6 +331,8 @@ an<Translation> TableTranslator::Query(const string& input,
 }
 
 bool TableTranslator::Memorize(const CommitEntry& commit_entry) {
+  if (is_tiger_schema(engine_))
+    return false;
   if (!user_dict_)
     return false;
   for (const DictEntry* e : commit_entry.elements) {

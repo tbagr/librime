@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/dev/workspace/android/ime/weasel/librime/buildprobe/cmake_install.cmake",
+		"C:/dev/workspace/android/ime/weasel/librime/buildprobe/plugins/cmake_install.cmake",
+		"C:/dev/workspace/android/ime/weasel/librime/buildprobe/plugins/lua/cmake_install.cmake",
+		"C:/dev/workspace/android/ime/weasel/librime/buildprobe/src/cmake_install.cmake",
+		"C:/dev/workspace/android/ime/weasel/librime/buildprobe/tools/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

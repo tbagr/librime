@@ -11,17 +11,17 @@ terrans:
     produced: 0x1c
   math:
     pi: 3.1415926
-  
+
 protoss:
   battery:
     energy: 10.111
   residence: Aiur
   air_force:
-  - scout
-  - cossair
-  - carrier
-  - arbiter
-  
+    - scout
+    - cossair
+    - carrier
+    - arbiter
+
 zerg:
   lurker:
     burrowed: true

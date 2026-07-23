@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
+title: ""
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe the bug**
@@ -12,6 +11,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the bug:
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
@@ -28,6 +28,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Flavor(please complete the following information):**
 Select your flavor:
+
 - [ ] ibus-rime
 - [ ] fcitx-rime
 - [ ] fcitx5-rime
@@ -36,6 +37,7 @@ Select your flavor:
 - [ ] Weasel
 
 Package:
+
 - OS: [e.g. openSUSE Tumbleweed]
 - Version: [e.g. 5.0.7]
 - URI: [e.g. https://software.opensuse.org/package/fcitx5-rime?search_term=fcitx5-rime]

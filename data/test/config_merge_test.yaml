@@ -14,7 +14,7 @@ append_with_patch:
   __include: starcraft
   __patch:
     # append to string
-    terrans/player/+: ', nada'
+    terrans/player/+: ", nada"
     # append to empty list
     terrans/air_units/+:
       - wraith
@@ -38,11 +38,11 @@ merge_tree:
     __patch:
       # append with `__patch`
       ground_units/+:
-      - medic
-      - goliath
+        - medic
+        - goliath
   protoss:
     # append to exising list, alternative syntax
-    ground_units: {__append: [dark templar, dark archon]}
+    ground_units: { __append: [dark templar, dark archon] }
   zerg:
     # overwrite existing list
     ground_units: []
@@ -52,5 +52,5 @@ create_list_with_inplace_patch:
   all_ground_units:
     __patch:
       - __append: [scv, marine, firebat, vulture, tank]
-      - __append: {__include: starcraft/protoss/ground_units}
-      - __append: {__include: starcraft/zerg/ground_units}
+      - __append: { __include: starcraft/protoss/ground_units }
+      - __append: { __include: starcraft/zerg/ground_units }

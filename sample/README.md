@@ -6,10 +6,10 @@ This directory offers a Rime plugin named `rime-sample`.
 
 Here's how a Rime plugin works:
 
-A *plugin* can either be linked to librime or be a separate shared library,
+A _plugin_ can either be linked to librime or be a separate shared library,
 corresponding to the `BUILD_MERGED_PLUGINS` cmake option.
 
-When the shared library is loaded, it registers itself as *module* `sample`.
+When the shared library is loaded, it registers itself as _module_ `sample`.
 If otherwise it's built-in, the module will be automatically loaded by default.
 
 When Rime `initialize`s via API, it loads its default modules or modules
@@ -18,14 +18,14 @@ specified by the caller in `RimeTraits::modules`.
 Modules can also be loaded on demand using C++ API `rime::LoadModules()`.
 
 When the module is loaded, the `rime_sample_initialize()` function is run,
-which registers a *component* `trivial_translator`.
+which registers a _component_ `trivial_translator`.
 
 That component is now available for prescription in Rime schema.
 It works with the Rime engine in the same way as the built-in translators.
 
 ## Build the sample plugin library
 
-``` shell
+```shell
 cd librime
 cmake . -Bbuild -DBUILD_SAMPLE=ON -DBUILD_SEPARATE_LIBS=ON
 cmake --build build --target rime-sample
@@ -38,7 +38,7 @@ The `BUILD_SEPARATE_LIBS=ON` option is not required but builds faster because
 
 ## Run unit tests
 
-``` shell
+```shell
 cmake --build build --target sample_test
 
 # run tests
@@ -53,7 +53,7 @@ the translator.
 
 Build the console app and try it with a random number in pinyin:
 
-``` shell
+```shell
 cmake --build build --target sample_console
 
 cd build/sample/bin
@@ -73,7 +73,7 @@ directory to `plugins/sample` and turn off cmake flag `BUILD_SAMPLE=OFF`.
 https://github.com/rime/librime-sample is the same sample plugin in its separate
 GitHub repository. You can checkout plugins (a list of slugs) with this command:
 
-``` shell
+```shell
 cd librime
 bash install-plugins.sh rime/librime-sample # ...
 ```

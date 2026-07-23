@@ -7,9 +7,8 @@
 ---
 name: dictionary_test
 version: "0.1"
-sort: by_weight  # by_weight / original
+sort: by_weight # by_weight / original
 ...
-
 巴	ba	3193
 爸	ba	3625
 八	ba	6677
