@@ -16,6 +16,17 @@
 
 namespace rime {
 
+static inline bool is_tiger_schema(Engine* engine) {
+  if (!engine || !engine->schema())
+    return false;
+  const string& schema_id = engine->schema()->schema_id();
+  return schema_id == "tiger" || schema_id == "tigress";
+}
+
+static inline bool is_digit_selection_key(int ch) {
+  return (ch >= XK_0 && ch <= XK_9) || (ch >= XK_KP_0 && ch <= XK_KP_9);
+}
+
 static Selector::ActionDef selector_actions[] = {
     {"previous_candidate", &Selector::PreviousCandidate},
     {"next_candidate", &Selector::NextCandidate},
@@ -138,15 +149,22 @@ ProcessResult Selector::ProcessKeyEvent(const KeyEvent& key_event) {
 
   int ch = key_event.keycode();
   int index = -1;
+  if (is_tiger_schema(engine_)) {
+    if (is_digit_selection_key(ch) && !ctx->input().empty() &&
+        !ctx->get_option("_key_binder_selecting")) {
+      return kNoop;
+    }
+  }
   const string& select_keys(engine_->schema()->select_keys());
-  if (!select_keys.empty() && !key_event.ctrl() && ch >= 0x20 && ch < 0x7f) {
+  if (index < 0 && !select_keys.empty() && !key_event.ctrl() && ch >= 0x20 &&
+      ch < 0x7f) {
     size_t pos = select_keys.find((char)ch);
     if (pos != string::npos) {
       index = static_cast<int>(pos);
     }
-  } else if (ch >= XK_0 && ch <= XK_9)
+  } else if (index < 0 && ch >= XK_0 && ch <= XK_9)
     index = ((ch - XK_0) + 9) % 10;
-  else if (ch >= XK_KP_0 && ch <= XK_KP_9)
+  else if (index < 0 && ch >= XK_KP_0 && ch <= XK_KP_9)
     index = ((ch - XK_KP_0) + 9) % 10;
   if (index >= 0) {
     SelectCandidateAt(ctx, index);

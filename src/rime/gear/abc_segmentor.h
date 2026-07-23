@@ -18,6 +18,7 @@ class AbcSegmentor : public Segmentor {
   virtual bool Proceed(Segmentation* segmentation);
 
  protected:
+  bool tiger_schema_ = false;
   string alphabet_;
   string delimiter_;
   string initials_;

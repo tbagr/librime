@@ -92,10 +92,11 @@ if %clean% == 1 (
 if defined CMAKE_GENERATOR (
   set common_cmake_flags=%common_cmake_flags% -G%CMAKE_GENERATOR%
 )
-if defined ARCH (
+set CMAKE_GENERATOR_NAME=%CMAKE_GENERATOR:"=%
+if defined ARCH if /I not "%CMAKE_GENERATOR_NAME%"=="NMake Makefiles" (
   set common_cmake_flags=%common_cmake_flags% -A%ARCH%
 )
-if defined PLATFORM_TOOLSET (
+if defined PLATFORM_TOOLSET if /I not "%CMAKE_GENERATOR_NAME%"=="NMake Makefiles" (
   set common_cmake_flags=%common_cmake_flags% -T%PLATFORM_TOOLSET%
 )
 
@@ -135,6 +136,7 @@ if %build_deps% == 1 (
   echo building yaml-cpp.
   pushd deps\yaml-cpp
   cmake . -B%build_dir% %deps_cmake_flags%^
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5^
   -DMSVC_SHARED_RT:BOOL=OFF^
   -DYAML_MSVC_SHARED_RT:BOOL=OFF^
   -DYAML_CPP_BUILD_CONTRIB:BOOL=OFF^

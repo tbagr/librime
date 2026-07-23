@@ -14,10 +14,16 @@ static const char kRimeAlphabet[] = "zyxwvutsrqponmlkjihgfedcba";
 
 namespace rime {
 
+static inline bool is_ascii_digit(char ch) {
+  return ch >= '0' && ch <= '9';
+}
+
 AbcSegmentor::AbcSegmentor(const Ticket& ticket)
     : Segmentor(ticket), alphabet_(kRimeAlphabet) {
   if (!ticket.schema)
     return;
+  const string& schema_id = ticket.schema->schema_id();
+  tiger_schema_ = schema_id == "tiger" || schema_id == "tigress";
   if (Config* config = ticket.schema->config()) {
     config->GetString("speller/alphabet", &alphabet_);
     config->GetString("speller/delimiter", &delimiter_);
@@ -44,9 +50,14 @@ bool AbcSegmentor::Proceed(Segmentation* segmentation) {
   bool expecting_an_initial = true;
   for (; k < input.length(); ++k) {
     bool is_letter = alphabet_.find(input[k]) != string::npos;
+    bool is_digit = tiger_schema_ && k != j && is_ascii_digit(input[k]);
     bool is_delimiter = (k != j) && (delimiter_.find(input[k]) != string::npos);
-    if (!is_letter && !is_delimiter)
+    if (!is_letter && !is_delimiter && !is_digit)
       break;
+    if (is_digit) {
+      expecting_an_initial = false;
+      continue;
+    }
     bool is_initial = initials_.find(input[k]) != string::npos;
     bool is_final = finals_.find(input[k]) != string::npos;
     if (expecting_an_initial && !is_initial && !is_delimiter) {

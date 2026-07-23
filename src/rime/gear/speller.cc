@@ -21,6 +21,17 @@ static const char kRimeAlphabet[] = "zyxwvutsrqponmlkjihgfedcba";
 
 namespace rime {
 
+static inline bool is_tiger_schema(Engine* engine) {
+  if (!engine || !engine->schema())
+    return false;
+  const string& schema_id = engine->schema()->schema_id();
+  return schema_id == "tiger" || schema_id == "tigress";
+}
+
+static inline bool is_ascii_digit_key(int ch) {
+  return ch >= XK_0 && ch <= XK_9;
+}
+
 static inline bool belongs_to(char ch, const string& charset) {
   return charset.find(ch) != string::npos;
 }
@@ -102,19 +113,35 @@ ProcessResult Speller::ProcessKeyEvent(const KeyEvent& key_event) {
       key_event.super())
     return kNoop;
   int ch = key_event.keycode();
+  Context* ctx = engine_->context();
+  const bool tiger_schema = is_tiger_schema(engine_);
+  const bool key_binder_selecting = ctx->get_option("_key_binder_selecting");
+  const bool tiger_inline_digit =
+      tiger_schema && !key_binder_selecting && is_ascii_digit_key(ch) &&
+      !ctx->input().empty();
+  const bool disable_auto_select =
+      tiger_schema &&
+      (tiger_inline_digit ||
+       ctx->input().find_first_of("0123456789") != string::npos);
   if (ch < 0x20 || ch >= 0x7f)  // not a valid key for spelling
     return kNoop;
   if (ch == XK_space && (!use_space_ || key_event.shift()))
     return kNoop;
-  if (!belongs_to(ch, alphabet_) && !belongs_to(ch, delimiters_))
+  if (!belongs_to(ch, alphabet_) && !belongs_to(ch, delimiters_) &&
+      !tiger_inline_digit)
     return kNoop;
-  Context* ctx = engine_->context();
+  if (tiger_inline_digit) {
+    ctx->ReopenPreviousSegment();
+  }
   bool is_initial = belongs_to(ch, initials_);
-  if (!is_initial && expecting_an_initial(ctx, alphabet_, finals_)) {
+  if (tiger_inline_digit)
+    is_initial = false;
+  if (!tiger_inline_digit && !is_initial &&
+      expecting_an_initial(ctx, alphabet_, finals_)) {
     return kNoop;
   }
   // handles input beyond max_code_length when auto_select is false.
-  if (is_initial && AutoSelectAtMaxCodeLength(ctx)) {
+  if (!disable_auto_select && is_initial && AutoSelectAtMaxCodeLength(ctx)) {
     DLOG(INFO) << "auto-select at max code length.";
   } else if ((auto_clear_ == kClearMaxLength || auto_clear_ == kClearManual) &&
              AutoClear(ctx)) {
@@ -122,13 +149,13 @@ ProcessResult Speller::ProcessKeyEvent(const KeyEvent& key_event) {
   }
   // make a backup of previous conversion before modifying input
   Segment previous_segment;
-  if (auto_select_ && ctx->HasMenu()) {
+  if (!disable_auto_select && auto_select_ && ctx->HasMenu()) {
     previous_segment = ctx->composition().back();
   }
   DLOG(INFO) << "add to input: '" << (char)ch << "', " << key_event.repr();
   ctx->PushInput(ch);
   ctx->BeginEditing();
-  if (AutoSelectPreviousMatch(ctx, &previous_segment)) {
+  if (!disable_auto_select && AutoSelectPreviousMatch(ctx, &previous_segment)) {
     DLOG(INFO) << "auto-select previous match.";
     // after auto-selecting, if only the current non-initial key is left,
     // then it should be handled by other processors.
@@ -137,7 +164,7 @@ ProcessResult Speller::ProcessKeyEvent(const KeyEvent& key_event) {
       return kNoop;
     }
   }
-  if (AutoSelectUniqueCandidate(ctx)) {
+  if (!disable_auto_select && AutoSelectUniqueCandidate(ctx)) {
     DLOG(INFO) << "auto-select unique candidate.";
   } else if (auto_clear_ == kClearAuto && AutoClear(ctx)) {
     DLOG(INFO) << "auto-clear when no candidate.";
