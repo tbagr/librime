@@ -14,9 +14,7 @@
 
 namespace rime {
 
-static const char* kEncodedPrefix =
-    "\x7f"
-    "enc\x1f";
+const char* UnityTableEncoder::kEncodedPrefix = "\x7f""enc\x1f";
 
 UnityTableEncoder::UnityTableEncoder(UserDictionary* user_dict)
     : TableEncoder(NULL), user_dict_(user_dict) {

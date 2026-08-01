@@ -329,10 +329,13 @@ static Bool rime_levers_update_user_phrase(const char* schema_id,
     code_str.pop_back();
   }
   // trailing space is part of the user dict key format; without it the entry
-  // would not match on exact lookup and would duplicate on sync import
+  // would not match on exact lookup and would duplicate on sync import.
+  // the encoded prefix marks the entry as a made-up word, so the candidate
+  // shows the unity symbol (yinyang) like auto-encoded entries.
   entry.custom_code = code_str + ' ';
   rime_levers_trace(L"rime_levers_update_user_phrase before UpdateEntry");
-  const bool ok = user_dict->UpdateEntry(entry, commits);
+  const bool ok =
+      user_dict->UpdateEntry(entry, commits, UnityTableEncoder::kEncodedPrefix);
   rime_levers_trace(ok ? L"rime_levers_update_user_phrase UpdateEntry ok"
                        : L"rime_levers_update_user_phrase UpdateEntry failed");
   if (ok) {

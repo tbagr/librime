@@ -45,6 +45,11 @@ class UnityTableEncoder : public TableEncoder, public PhraseCollector {
   static bool AddPrefix(string* key);
   static bool RemovePrefix(string* key);
 
+  // Prefix marking entries written by the (unity) table encoder, e.g. words
+  // built via the make-word switch or the levers phrase APIs. Candidates from
+  // such entries carry the unity symbol (yinyang) as their comment.
+  static const char* kEncodedPrefix;
+
  protected:
   UserDictionary* user_dict_;
   the<ReverseLookupDictionary> rev_dict_;

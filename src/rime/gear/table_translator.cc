@@ -376,9 +376,11 @@ void TableTranslator::FlushMakeWord() {
   DictEntry entry;
   entry.text = phrase;
   // trailing space is part of the user dict key format; without it the entry
-  // would not match on exact lookup and would duplicate on sync import
+  // would not match on exact lookup and would duplicate on sync import.
+  // the encoded prefix marks the entry as a made-up word, so the candidate
+  // shows the unity symbol (yinyang) like auto-encoded entries.
   entry.custom_code = code + ' ';
-  user_dict_->UpdateEntry(entry, 1);
+  user_dict_->UpdateEntry(entry, 1, UnityTableEncoder::kEncodedPrefix);
   encoder_->DeleteEncodedPhraseChain(phrase);
 }
 
