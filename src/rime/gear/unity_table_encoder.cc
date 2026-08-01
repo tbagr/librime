@@ -5,6 +5,8 @@
 // 2013-08-31 GONG Chen <chen.sst@gmail.com>
 //
 #include <boost/algorithm/string.hpp>
+#include <set>
+#include <utf8.h>
 #include <rime/dict/dict_settings.h>
 #include <rime/dict/user_dictionary.h>
 #include <rime/dict/reverse_lookup_dictionary.h>
@@ -47,11 +49,89 @@ void UnityTableEncoder::CreateEntry(const string& word,
                                     const string& weight_str) {
   if (!user_dict_)
     return;
+  if (capture_mode_) {
+    if (captured_code_.empty() && !word.empty() && !code_str.empty()) {
+      captured_code_ = code_str;
+    }
+    return;
+  }
   DictEntry entry;
   entry.text = word;
   entry.custom_code = code_str + ' ';
+  if (delete_mode_) {
+    user_dict_->UpdateEntry(entry, -1, kEncodedPrefix);
+    return;
+  }
   int commits = (weight_str == "0") ? 0 : 1;
   user_dict_->UpdateEntry(entry, commits, kEncodedPrefix);
+}
+
+bool UnityTableEncoder::DeletePhrase(const string& phrase) {
+  if (!loaded_ || !user_dict_ || phrase.empty()) {
+    return false;
+  }
+  delete_mode_ = true;
+  bool ok = EncodePhrase(phrase, "0");
+  delete_mode_ = false;
+  return ok;
+}
+
+bool UnityTableEncoder::CapturePhraseCode(const string& phrase, string* code) {
+  if (!loaded_ || !user_dict_ || !code || phrase.empty()) {
+    return false;
+  }
+  capture_mode_ = true;
+  captured_code_.clear();
+  bool ok = EncodePhrase(phrase, "1");
+  capture_mode_ = false;
+  if (ok && !captured_code_.empty()) {
+    *code = captured_code_;
+    return true;
+  }
+  return false;
+}
+
+bool UnityTableEncoder::DeleteEncodedPhraseChain(const string& phrase) {
+  if (!loaded_ || !user_dict_ || phrase.empty()) {
+    return false;
+  }
+  vector<string> chars;
+  auto it = phrase.begin();
+  while (it != phrase.end()) {
+    auto start = it;
+    utf8::next(it, phrase.end());
+    chars.emplace_back(start, it);
+  }
+  if (chars.size() < 2) {
+    return false;
+  }
+  std::set<string> phrases_to_delete;
+  // exclude the phrase itself: it is written at fixed frequency, not junk
+  for (size_t length = 1; length < chars.size(); ++length) {
+    for (size_t start = 0; start + length <= chars.size(); ++start) {
+      string subphrase;
+      for (size_t i = start; i < start + length; ++i) {
+        subphrase += chars[i];
+      }
+      phrases_to_delete.insert(subphrase);
+    }
+  }
+  bool deleted_any = false;
+  for (const auto& subphrase : phrases_to_delete) {
+    string code;
+    if (!CapturePhraseCode(subphrase, &code)) {
+      continue;
+    }
+    // only tombstone sub-strings that already exist as auto-encoded entries,
+    // otherwise a fresh tombstone would pollute the user dict as well
+    UserDictEntryIterator iter;
+    LookupPhrases(&iter, code, false, 1, nullptr);
+    if (iter.exhausted()) {
+      continue;
+    }
+    deleted_any = DeletePhrase(subphrase) || deleted_any;
+  }
+  return deleted_any;
 }
 
 bool UnityTableEncoder::TranslateWord(const string& word,

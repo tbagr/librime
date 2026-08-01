@@ -26,6 +26,13 @@ class UnityTableEncoder : public TableEncoder, public PhraseCollector {
   void CreateEntry(const string& word,
                    const string& code_str,
                    const string& weight_str);
+  bool DeletePhrase(const string& phrase);
+  // Encode the phrase by the schema's encoder rules without writing to
+  // user_dict, and capture the first code produced.
+  bool CapturePhraseCode(const string& phrase, string* code);
+  // Tombstone auto-encoded junk sub-strings (excluding the phrase itself) of
+  // the given phrase, only for sub-strings that already exist in the user dict.
+  bool DeleteEncodedPhraseChain(const string& phrase);
   bool TranslateWord(const string& word, vector<string>* code);
 
   size_t LookupPhrases(UserDictEntryIterator* result,
@@ -41,6 +48,9 @@ class UnityTableEncoder : public TableEncoder, public PhraseCollector {
  protected:
   UserDictionary* user_dict_;
   the<ReverseLookupDictionary> rev_dict_;
+  bool delete_mode_ = false;
+  bool capture_mode_ = false;
+  string captured_code_;
 };
 
 }  // namespace rime

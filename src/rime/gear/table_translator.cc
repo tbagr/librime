@@ -237,14 +237,16 @@ TableTranslator::TableTranslator(const Ticket& ticket)
       poet_.reset(new Poet(language(), config, Poet::LeftAssociateCompare));
     }
   }
-  if (is_tiger_schema(engine_)) {
-    enable_encoder_ = false;
-    encode_commit_history_ = false;
-  }
   if (enable_encoder_ && user_dict_) {
     encoder_.reset(new UnityTableEncoder(user_dict_.get()));
     encoder_->Load(ticket);
   }
+  make_word_connection_ = engine_->context()->option_update_notifier().connect(
+      [this](Context* ctx, const string& option) {
+        if (option == "aggressive_auto_phrase") {
+          OnMakeWordOptionChanged(ctx);
+        }
+      });
 }
 
 static bool starts_with_completion(an<Translation> translation) {
@@ -272,8 +274,8 @@ an<Translation> TableTranslator::Query(const string& input,
 
   FinishSession();
 
-  bool enable_user_dict = !is_tiger_schema(engine_) && user_dict_ &&
-                          user_dict_->loaded() && !IsUserDictDisabledFor(input);
+  bool enable_user_dict = user_dict_ && user_dict_->loaded() &&
+                          !IsUserDictDisabledFor(input);
 
   const string& preedit(input);
   string code = input;
@@ -331,52 +333,53 @@ an<Translation> TableTranslator::Query(const string& input,
 }
 
 bool TableTranslator::Memorize(const CommitEntry& commit_entry) {
-  if (is_tiger_schema(engine_))
-    return false;
   if (!user_dict_)
     return false;
-  for (const DictEntry* e : commit_entry.elements) {
-    if (is_constructed(e)) {
-      DictEntry blessed(*e);
-      UnityTableEncoder::RemovePrefix(&blessed.custom_code);
-      user_dict_->UpdateEntry(blessed, 1);
-    } else {
-      user_dict_->UpdateEntry(*e, 1);
-    }
+  if (make_word_recording_) {
+    make_word_buffer_ += commit_entry.text;
+    return true;  // recording only: defer everything to FlushMakeWord()
   }
-  if (encoder_ && encoder_->loaded()) {
-    if (commit_entry.elements.size() > 1) {
-      encoder_->EncodePhrase(commit_entry.text, "1");
-    }
-    if (encode_commit_history_) {
-      const auto& history(engine_->context()->commit_history());
-      if (!history.empty()) {
-        DLOG(INFO) << "history: " << history.repr();
-        auto it = history.rbegin();
-        if (it->type == "punct") {  // ending with punctuation
-          ++it;
-        }
-        string phrase;
-        for (; it != history.rend(); ++it) {
-          if (it->type != "table" && it->type != "user_table" &&
-              it->type != "sentence" && it->type != "uniquified")
-            break;
-          if (phrase.empty()) {
-            phrase = it->text;  // last word
-            continue;
-          }
-          phrase = it->text + phrase;  // prepend another word
-          size_t phrase_length = utf8::unchecked::distance(
-              phrase.c_str(), phrase.c_str() + phrase.length());
-          if (static_cast<int>(phrase_length) > max_phrase_length_)
-            break;
-          DLOG(INFO) << "phrase: " << phrase;
-          encoder_->EncodePhrase(phrase, "0");
-        }
-      }
-    }
-  }
+  // No user dict writes from plain typing: committing a candidate again
+  // would re-write the entry with a different key format and leave
+  // duplicates. The user dict is only written by the make-word switch
+  // session (FlushMakeWord) and the word dialog (levers API), both at
+  // fixed frequency.
   return true;
+}
+
+void TableTranslator::OnMakeWordOptionChanged(Context* ctx) {
+  if (!ctx)
+    return;
+  if (ctx->get_option("aggressive_auto_phrase")) {
+    make_word_recording_ = true;
+    make_word_buffer_.clear();
+  } else {
+    FlushMakeWord();
+  }
+}
+
+void TableTranslator::FlushMakeWord() {
+  if (!make_word_recording_)
+    return;
+  make_word_recording_ = false;
+  string phrase = make_word_buffer_;
+  make_word_buffer_.clear();
+  if (phrase.empty() || !encoder_ || !encoder_->loaded() || !user_dict_)
+    return;
+  size_t char_count =
+      utf8::unchecked::distance(phrase.begin(), phrase.end());
+  if (char_count <= 1)  // single char: no word building
+    return;
+  string code;
+  if (!encoder_->CapturePhraseCode(phrase, &code))
+    return;
+  DictEntry entry;
+  entry.text = phrase;
+  // trailing space is part of the user dict key format; without it the entry
+  // would not match on exact lookup and would duplicate on sync import
+  entry.custom_code = code + ' ';
+  user_dict_->UpdateEntry(entry, 1);
+  encoder_->DeleteEncodedPhraseChain(phrase);
 }
 
 string TableTranslator::GetPrecedingText(size_t start) const {

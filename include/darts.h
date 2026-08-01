@@ -36,7 +36,7 @@ typedef int value_type;
 
 // The main structure of Darts-clone is an array of <DoubleArrayUnit>s, and the
 // unit type is actually a wrapper of <id_type>.
-typedef unsigned int id_type;
+typedef size_t id_type;
 
 // <progress_func_type> is the type of callback functions for reporting the
 // progress of building a dictionary. See also build() of <DoubleArray>.
@@ -62,7 +62,7 @@ class DoubleArrayUnit {
     return static_cast<value_type>(unit_ & ((1U << 31) - 1));
   }
 
-  // label() returns the label associated with the unit. Note that a leaf unit
+  // label() returns the label associted with the unit. Note that a leaf unit
   // always returns an invalid label. For this feature, leaf unit's label()
   // returns an <id_type> that has the MSB of 1.
   id_type label() const {
@@ -861,7 +861,7 @@ class Keyset {
   bool has_values() const {
     return values_ != NULL;
   }
-  const value_type values(std::size_t id) const {
+  value_type values(std::size_t id) const {
     if (has_values()) {
       return static_cast<value_type>(values_[id]);
     }

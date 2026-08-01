@@ -38,6 +38,12 @@ class TableTranslator : public Translator,
   UnityTableEncoder* encoder() const { return encoder_.get(); }
 
  protected:
+  // Make-word switch (aggressive_auto_phrase) support: accumulate committed
+  // text while the switch is on, encode the whole phrase as a word with fixed
+  // frequency on switch-off, and clean up junk sub-string words.
+  void OnMakeWordOptionChanged(Context* ctx);
+  void FlushMakeWord();
+
   bool enable_charset_filter_ = false;
   bool enable_encoder_ = false;
   bool enable_sentence_ = true;
@@ -47,6 +53,9 @@ class TableTranslator : public Translator,
   int max_homographs_ = 1;
   the<Poet> poet_;
   the<UnityTableEncoder> encoder_;
+  bool make_word_recording_ = false;
+  string make_word_buffer_;
+  boost::signals2::scoped_connection make_word_connection_;
 };
 
 class TableTranslation : public Translation {

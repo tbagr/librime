@@ -79,6 +79,17 @@ typedef struct RIME_FLAVORED(rime_levers_api_t) {
   Bool (*restore_user_dict)(const char* snapshot_file);
   int (*export_user_dict)(const char* dict_name, const char* text_file);
   int (*import_user_dict)(const char* dict_name, const char* text_file);
+  Bool (*add_user_phrase)(const char* schema_id,
+                          const char* code,
+                          const char* text);
+  Bool (*remove_user_phrase)(const char* schema_id,
+                             const char* code,
+                             const char* text);
+  // Encode a whole phrase by the schema's encoder rules into user_dict at
+  // fixed frequency, and delete all auto-encoded sub-strings of the phrase,
+  // so no junk single-char/prefix words remain (called at the end of a
+  // make-word switch session).
+  Bool (*encode_user_phrase)(const char* schema_id, const char* text);
 
   // patch a list or a map
   Bool (*customize_item)(RimeCustomSettings* settings,

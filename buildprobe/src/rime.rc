@@ -21,20 +21,20 @@ BEGIN
 #ifdef LOCALIZE_VERSION_INFO
     BLOCK "080404b0"
     BEGIN
-      VALUE "CompanyName", "式恕堂"
+      VALUE "CompanyName", "tbgar"
       VALUE "FileDescription", "中州韵输入法引擎"
       VALUE "InternalName", "librime"
-      VALUE "LegalCopyright", "式恕堂 版权所无"
+      VALUE "LegalCopyright", "tbgar 版权所无"
       VALUE "OriginalFilename", "rime.dll"
       VALUE "ProductName", "中州韵输入法引擎"
       VALUE "ProductVersion", "1.13.1.0"
     END
     BLOCK "040904b0"
     BEGIN
-      VALUE "CompanyName", "式恕堂"
+      VALUE "CompanyName", "tbgar"
       VALUE "FileDescription", "中州韻輸入法引擎"
       VALUE "InternalName", "librime"
-      VALUE "LegalCopyright", "式恕堂 版權所無"
+      VALUE "LegalCopyright", "tbgar 版權所無"
       VALUE "OriginalFilename", "rime.dll"
       VALUE "ProductName", "中州韻輸入法引擎"
       VALUE "ProductVersion", "1.13.1.0"

@@ -89,6 +89,8 @@ if %clean% == 1 (
   rmdir /s /q deps\yaml-cpp\%build_dir%
 )
 
+set common_cmake_flags=
+
 if defined CMAKE_GENERATOR (
   set common_cmake_flags=%common_cmake_flags% -G%CMAKE_GENERATOR%
 )

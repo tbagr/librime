@@ -1,7 +1,7 @@
 project(rime-sample)
 cmake_minimum_required(VERSION 3.10)
 
-set(SAMPLE_VERSION 1.0.0)
+set(SAMPLE_VERSION 1.0.1)
 set(SAMPLE_SOVERSION 1)
 
 aux_source_directory(src sample_src)
