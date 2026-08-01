@@ -24,3 +24,5 @@ lib_Win32/
 lib_x64/
 lua/
 test_vs/
+build_rime.bat
+build_tools.bat
