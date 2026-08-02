@@ -215,8 +215,29 @@ bool UserDbMerger::Put(const string& key, const string& value) {
   if (o.tick < our_tick_) {
     o.dee = algo::formula_d(0, (double)our_tick_, o.dee, (double)o.tick);
   }
-  if (std::abs(o.commits) < std::abs(v.commits))
+  if (o.commits == 0) {
+    // no local record; adopt the remote one
     o.commits = v.commits;
+  } else if (v.commits > 0) {
+    if (o.commits > 0) {
+      // both alive: keep the more committed entry
+      if (o.commits < v.commits)
+        o.commits = v.commits;
+    } else if (v.tick > o.tick) {
+      // our entry deleted, but the remote one is newer: revive
+      o.commits = v.commits;
+    }
+    // otherwise keep our tombstone
+  } else if (v.commits < 0) {
+    if (o.commits > 0) {
+      // remote entry deleted: apply the deletion if it is not older
+      if (v.tick >= o.tick)
+        o.commits = v.commits;
+    } else {
+      // both deleted: keep the stronger tombstone
+      o.commits = (std::min)(o.commits, v.commits);
+    }
+  }
   o.dee = (std::max)(o.dee, v.dee);
   o.tick = max_tick_;
   return db_->Update(key, o.Pack()) && ++merged_entries_;
