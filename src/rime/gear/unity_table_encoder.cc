@@ -14,8 +14,6 @@
 
 namespace rime {
 
-const char* UnityTableEncoder::kEncodedPrefix = "\x7f""enc\x1f";
-
 UnityTableEncoder::UnityTableEncoder(UserDictionary* user_dict)
     : TableEncoder(NULL), user_dict_(user_dict) {
   set_collector(this);
@@ -57,11 +55,11 @@ void UnityTableEncoder::CreateEntry(const string& word,
   entry.text = word;
   entry.custom_code = code_str + ' ';
   if (delete_mode_) {
-    user_dict_->UpdateEntry(entry, -1, kEncodedPrefix);
+    user_dict_->UpdateEntry(entry, -1);
     return;
   }
   int commits = (weight_str == "0") ? 0 : 1;
-  user_dict_->UpdateEntry(entry, commits, kEncodedPrefix);
+  user_dict_->UpdateEntry(entry, commits);
 }
 
 bool UnityTableEncoder::DeletePhrase(const string& phrase) {
@@ -153,24 +151,7 @@ size_t UnityTableEncoder::LookupPhrases(UserDictEntryIterator* result,
                                         string* resume_key) {
   if (!user_dict_)
     return 0;
-  return user_dict_->LookupWords(result, kEncodedPrefix + input, predictive,
-                                 limit, resume_key);
-}
-
-bool UnityTableEncoder::HasPrefix(const string& key) {
-  return boost::starts_with(key, kEncodedPrefix);
-}
-
-bool UnityTableEncoder::AddPrefix(string* key) {
-  key->insert(0, kEncodedPrefix);
-  return true;
-}
-
-bool UnityTableEncoder::RemovePrefix(string* key) {
-  if (!HasPrefix(*key))
-    return false;
-  key->erase(0, strlen(kEncodedPrefix));
-  return true;
+  return user_dict_->LookupWords(result, input, predictive, limit, resume_key);
 }
 
 }  // namespace rime

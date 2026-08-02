@@ -66,16 +66,12 @@ bool TableTranslation::Next() {
   return !CheckEmpty();
 }
 
-static bool is_constructed(const DictEntry* e) {
-  return UnityTableEncoder::HasPrefix(e->custom_code);
-}
-
 an<Candidate> TableTranslation::Peek() {
   if (exhausted())
     return nullptr;
   bool is_user_phrase = PreferUserPhrase();
   auto e = PreferredEntry(is_user_phrase);
-  string comment(is_constructed(e.get()) ? kUnitySymbol : e->comment);
+  string comment(is_user_phrase ? kUnitySymbol : e->comment);
   if (options_) {
     options_->comment_formatter().Apply(&comment);
   }
@@ -105,8 +101,7 @@ bool TableTranslation::PreferUserPhrase() {
   if (iter_.exhausted())
     return true;
   if (iter_.Peek()->remaining_code_length == 0 &&
-      (uter_.Peek()->remaining_code_length != 0 ||
-       is_constructed(uter_.Peek().get())))
+      uter_.Peek()->remaining_code_length != 0)
     return false;
   else
     return true;
@@ -377,10 +372,11 @@ void TableTranslator::FlushMakeWord() {
   entry.text = phrase;
   // trailing space is part of the user dict key format; without it the entry
   // would not match on exact lookup and would duplicate on sync import.
-  // the encoded prefix marks the entry as a made-up word, so the candidate
-  // shows the unity symbol (yinyang) like auto-encoded entries.
+  // the entry is written without any marker, so the synced user dictionary
+  // stays clean; the candidate shows the unity symbol (yinyang) because it
+  // comes from the user dictionary.
   entry.custom_code = code + ' ';
-  user_dict_->UpdateEntry(entry, 1, UnityTableEncoder::kEncodedPrefix);
+  user_dict_->UpdateEntry(entry, 1);
   encoder_->DeleteEncodedPhraseChain(phrase);
 }
 
@@ -624,7 +620,6 @@ an<Translation> TableTranslator::MakeSentence(const string& input,
       }
     }
     if (encoder_ && encoder_->loaded()) {
-      UnityTableEncoder::AddPrefix(&active_key);
       for (size_t len = 1; len <= active_input.length(); ++len) {
         size_t consumed_length =
             consume_trailing_delimiters(len, active_input, delimiters_);
