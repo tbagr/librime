@@ -230,8 +230,9 @@ bool UserDbMerger::Put(const string& key, const string& value) {
     // otherwise keep our tombstone
   } else if (v.commits < 0) {
     if (o.commits > 0) {
-      // remote entry deleted: apply the deletion if it is not older
-      if (v.tick >= o.tick)
+      // remote entry deleted: apply the deletion only if it is strictly newer;
+      // a same-tick tombstone must not re-delete a word re-created locally
+      if (v.tick > o.tick)
         o.commits = v.commits;
     } else {
       // both deleted: keep the stronger tombstone
