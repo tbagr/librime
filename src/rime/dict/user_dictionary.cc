@@ -441,6 +441,10 @@ bool UserDictionary::UpdateEntry(const DictEntry& entry,
     v.dee = algo::formula_d(k, (double)tick_, v.dee, (double)v.tick);
   } else if (commits < 0) {  // mark as deleted
     v.commits = (std::min)(-1, -v.commits);
+    // a deletion is a state change too: bump the tick so that the tombstone
+    // is strictly newer than any same-word entry on peer devices and thus
+    // survives cross-device sync (merge requires v.tick > o.tick)
+    UpdateTickCount(1);
     v.dee = algo::formula_d(0.0, (double)tick_, v.dee, (double)v.tick);
   }
   v.tick = tick_;
