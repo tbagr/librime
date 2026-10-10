@@ -50,8 +50,22 @@ void UnityTableEncoder::CreateEntry(const string& word,
   DictEntry entry;
   entry.text = word;
   entry.custom_code = code_str + ' ';
+  if (delete_mode_) {
+    user_dict_->UpdateEntry(entry, -1, kEncodedPrefix);
+    return;
+  }
   int commits = (weight_str == "0") ? 0 : 1;
   user_dict_->UpdateEntry(entry, commits, kEncodedPrefix);
+}
+
+bool UnityTableEncoder::DeletePhrase(const string& phrase) {
+  if (!loaded_ || !user_dict_ || phrase.empty()) {
+    return false;
+  }
+  delete_mode_ = true;
+  bool ok = EncodePhrase(phrase, "0");
+  delete_mode_ = false;
+  return ok;
 }
 
 bool UnityTableEncoder::TranslateWord(const string& word,

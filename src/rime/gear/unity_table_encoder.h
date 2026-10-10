@@ -26,6 +26,7 @@ class UnityTableEncoder : public TableEncoder, public PhraseCollector {
   void CreateEntry(const string& word,
                    const string& code_str,
                    const string& weight_str);
+  bool DeletePhrase(const string& phrase);
   bool TranslateWord(const string& word, vector<string>* code);
 
   size_t LookupPhrases(UserDictEntryIterator* result,
@@ -41,6 +42,7 @@ class UnityTableEncoder : public TableEncoder, public PhraseCollector {
  protected:
   UserDictionary* user_dict_;
   the<ReverseLookupDictionary> rev_dict_;
+  bool delete_mode_ = false;
 };
 
 }  // namespace rime
