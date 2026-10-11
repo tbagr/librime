@@ -18,6 +18,46 @@
 
 namespace rime {
 
+static inline bool is_digit_selection_key(const KeyEvent& key_event) {
+  int ch = key_event.keycode();
+  return (ch >= XK_0 && ch <= XK_9) || (ch >= XK_KP_0 && ch <= XK_KP_9);
+}
+
+static inline int selection_index_from_digit_key(const KeyEvent& key_event) {
+  int ch = key_event.keycode();
+  if (ch >= XK_0 && ch <= XK_9)
+    return ((ch - XK_0) + 9) % 10;
+  if (ch >= XK_KP_0 && ch <= XK_KP_9)
+    return ((ch - XK_KP_0) + 9) % 10;
+  return -1;
+}
+
+static bool select_candidate_by_digit(Engine* engine, const KeyEvent& key_event) {
+  if (!engine)
+    return false;
+  Context* ctx = engine->context();
+  if (!ctx || !ctx->HasMenu() || ctx->composition().empty()) {
+    return false;
+  }
+  int index = selection_index_from_digit_key(key_event);
+  if (index < 0) {
+    return false;
+  }
+  int page_size = engine->schema()->page_size();
+  if (index >= page_size) {
+    return false;
+  }
+  Composition& comp = ctx->composition();
+  int selected_index = static_cast<int>(comp.back().selected_index);
+  int page_start = (selected_index / page_size) * page_size;
+  const int target_index = page_start + index;
+  const bool selected = ctx->Select(target_index);
+  if (!selected) {
+    return false;
+  }
+  return true;
+}
+
 enum KeyBindingCondition {
   kNever,
   kWhenPredicting,  // showing prediction candidates
@@ -186,7 +226,13 @@ void KeyBindings::LoadBindings(const an<ConfigList>& bindings) {
     if (auto target = map->GetValue("send")) {
       KeyEvent key;
       if (key.Parse(target->str())) {
-        binding.target.push_back(std::move(key));
+        if (binding.whence == kWhenHasMenu && is_digit_selection_key(key)) {
+          binding.action = [key](Engine* engine) {
+            select_candidate_by_digit(engine, key);
+          };
+        } else {
+          binding.target.push_back(std::move(key));
+        }
       } else {
         LOG(WARNING) << "invalid key binding #" << i
                      << ", with invalid send pattern: " << target->str() << ".";
@@ -291,8 +337,19 @@ void KeyBinder::PerformKeyBinding(const KeyBinding& binding) {
     binding.action(engine_);
   } else {
     redirecting_ = true;
+    Context* ctx = engine_->context();
     for (const KeyEvent& key_event : binding.target) {
+      const bool selecting_with_digit = is_digit_selection_key(key_event);
+      if (selecting_with_digit && select_candidate_by_digit(engine_, key_event)) {
+        continue;
+      }
+      if (selecting_with_digit) {
+        ctx->set_option("_key_binder_selecting", true);
+      }
       engine_->ProcessKey(key_event);
+      if (selecting_with_digit) {
+        ctx->set_option("_key_binder_selecting", false);
+      }
     }
     redirecting_ = false;
   }
