@@ -221,6 +221,8 @@ TableTranslator::TableTranslator(const Ticket& ticket)
     config->GetBool(name_space_ + "/enable_encoder", &enable_encoder_);
     config->GetBool(name_space_ + "/encode_commit_history",
                     &encode_commit_history_);
+    config->GetBool(name_space_ + "/respect_aggressive_auto_phrase",
+                    &respect_aggressive_auto_phrase_);
     config->GetInt(name_space_ + "/max_phrase_length", &max_phrase_length_);
     config->GetInt(name_space_ + "/max_homographs", &max_homographs_);
     if (enable_sentence_ || sentence_over_completion_ ||
@@ -309,6 +311,10 @@ an<Translation> TableTranslator::Query(const string& input,
 }
 
 bool TableTranslator::Memorize(const CommitEntry& commit_entry) {
+  if (respect_aggressive_auto_phrase_ &&
+      !engine_->context()->get_option("aggressive_auto_phrase")) {
+    return true;
+  }
   if (!user_dict_)
     return false;
   for (const DictEntry* e : commit_entry.elements) {
